@@ -8,6 +8,8 @@ This is mini CRM with basic features.
 ## 🚀 Mini CRM Feature Breakdown
 | Feature                        |
 |--------------------------------|
+| **Notification**               |
+| **Login OAuth 2.0**            |
 | **Leads & Contact Management** |
 | **Sales Pipeline (Kanban)**    |
 | **Task & Follow-Up Reminders** |
