@@ -295,14 +295,35 @@ func initServer(server *gin.Engine) {
 		},
 		OpenAPIPath: "/anhle/openapi",
 		// Path to the OpenAPI specification.
-		DocsPath: "/anhle/openapi",
+		DocsPath: "",
 		// Path to the documentation.
 		Formats: huma.DefaultFormats,
 		// Supported formats of the API.
 		DefaultFormat: "application/json",
 		// Default format of the API.
 	})
+
 	api := hureg.NewAPIGen(humaAPI)
+	server.GET("/anhle/openapi/docs", func(c *gin.Context) {
+		c.Data(http.StatusOK, "text/html; charset=utf-8", []byte(`
+		<!doctype html>
+		<html>
+			<head>
+				<title>Mini CRM APIs</title>
+				<meta charset="utf-8" />
+				<meta name="viewport" content="width=device-width, initial-scale=1" />
+			</head>
+			<body>
+				<script
+					id="api-reference"
+					data-url="/anhle/openapi.json">
+				</script>
+				<script src="https://cdn.jsdelivr.net/npm/@scalar/api-reference"></script>
+			</body>
+		</html>
+		`))
+	})
+
 	// Create a new Hureg API generator.
 
 	initServices(server, &api)
