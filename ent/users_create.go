@@ -11,6 +11,7 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
 	"github.com/besanh/mini-crm/ent/users"
+	"github.com/besanh/mini-crm/models"
 	"github.com/google/uuid"
 )
 
@@ -49,15 +50,21 @@ func (uc *UsersCreate) SetNillableUpdatedAt(t *time.Time) *UsersCreate {
 	return uc
 }
 
+// SetUserProfile sets the "user_profile" field.
+func (uc *UsersCreate) SetUserProfile(mp models.UserProfile) *UsersCreate {
+	uc.mutation.SetUserProfile(mp)
+	return uc
+}
+
 // SetStatus sets the "status" field.
 func (uc *UsersCreate) SetStatus(u users.Status) *UsersCreate {
 	uc.mutation.SetStatus(u)
 	return uc
 }
 
-// SetRoles sets the "roles" field.
-func (uc *UsersCreate) SetRoles(s []string) *UsersCreate {
-	uc.mutation.SetRoles(s)
+// SetScope sets the "scope" field.
+func (uc *UsersCreate) SetScope(s []string) *UsersCreate {
+	uc.mutation.SetScope(s)
 	return uc
 }
 
@@ -120,6 +127,9 @@ func (uc *UsersCreate) check() error {
 	if _, ok := uc.mutation.UpdatedAt(); !ok {
 		return &ValidationError{Name: "updated_at", err: errors.New(`ent: missing required field "Users.updated_at"`)}
 	}
+	if _, ok := uc.mutation.UserProfile(); !ok {
+		return &ValidationError{Name: "user_profile", err: errors.New(`ent: missing required field "Users.user_profile"`)}
+	}
 	if _, ok := uc.mutation.Status(); !ok {
 		return &ValidationError{Name: "status", err: errors.New(`ent: missing required field "Users.status"`)}
 	}
@@ -127,9 +137,6 @@ func (uc *UsersCreate) check() error {
 		if err := users.StatusValidator(v); err != nil {
 			return &ValidationError{Name: "status", err: fmt.Errorf(`ent: validator failed for field "Users.status": %w`, err)}
 		}
-	}
-	if _, ok := uc.mutation.Roles(); !ok {
-		return &ValidationError{Name: "roles", err: errors.New(`ent: missing required field "Users.roles"`)}
 	}
 	return nil
 }
@@ -174,13 +181,17 @@ func (uc *UsersCreate) createSpec() (*Users, *sqlgraph.CreateSpec) {
 		_spec.SetField(users.FieldUpdatedAt, field.TypeTime, value)
 		_node.UpdatedAt = value
 	}
+	if value, ok := uc.mutation.UserProfile(); ok {
+		_spec.SetField(users.FieldUserProfile, field.TypeJSON, value)
+		_node.UserProfile = value
+	}
 	if value, ok := uc.mutation.Status(); ok {
 		_spec.SetField(users.FieldStatus, field.TypeEnum, value)
 		_node.Status = value
 	}
-	if value, ok := uc.mutation.Roles(); ok {
-		_spec.SetField(users.FieldRoles, field.TypeJSON, value)
-		_node.Roles = value
+	if value, ok := uc.mutation.Scope(); ok {
+		_spec.SetField(users.FieldScope, field.TypeJSON, value)
+		_node.Scope = value
 	}
 	return _node, _spec
 }

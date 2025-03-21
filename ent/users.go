@@ -11,6 +11,7 @@ import (
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
 	"github.com/besanh/mini-crm/ent/users"
+	"github.com/besanh/mini-crm/models"
 	"github.com/google/uuid"
 )
 
@@ -23,10 +24,12 @@ type Users struct {
 	CreatedAt time.Time `json:"created_at,omitempty"`
 	// UpdatedAt holds the value of the "updated_at" field.
 	UpdatedAt time.Time `json:"updated_at,omitempty"`
+	// UserProfile holds the value of the "user_profile" field.
+	UserProfile models.UserProfile `json:"user_profile,omitempty"`
 	// Status holds the value of the "status" field.
 	Status users.Status `json:"status,omitempty"`
-	// Roles holds the value of the "roles" field.
-	Roles        []string `json:"roles,omitempty"`
+	// Scope holds the value of the "scope" field.
+	Scope        []string `json:"scope,omitempty"`
 	selectValues sql.SelectValues
 }
 
@@ -35,7 +38,7 @@ func (*Users) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case users.FieldRoles:
+		case users.FieldUserProfile, users.FieldScope:
 			values[i] = new([]byte)
 		case users.FieldStatus:
 			values[i] = new(sql.NullString)
@@ -76,18 +79,26 @@ func (u *Users) assignValues(columns []string, values []any) error {
 			} else if value.Valid {
 				u.UpdatedAt = value.Time
 			}
+		case users.FieldUserProfile:
+			if value, ok := values[i].(*[]byte); !ok {
+				return fmt.Errorf("unexpected type %T for field user_profile", values[i])
+			} else if value != nil && len(*value) > 0 {
+				if err := json.Unmarshal(*value, &u.UserProfile); err != nil {
+					return fmt.Errorf("unmarshal field user_profile: %w", err)
+				}
+			}
 		case users.FieldStatus:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field status", values[i])
 			} else if value.Valid {
 				u.Status = users.Status(value.String)
 			}
-		case users.FieldRoles:
+		case users.FieldScope:
 			if value, ok := values[i].(*[]byte); !ok {
-				return fmt.Errorf("unexpected type %T for field roles", values[i])
+				return fmt.Errorf("unexpected type %T for field scope", values[i])
 			} else if value != nil && len(*value) > 0 {
-				if err := json.Unmarshal(*value, &u.Roles); err != nil {
-					return fmt.Errorf("unmarshal field roles: %w", err)
+				if err := json.Unmarshal(*value, &u.Scope); err != nil {
+					return fmt.Errorf("unmarshal field scope: %w", err)
 				}
 			}
 		default:
@@ -132,11 +143,14 @@ func (u *Users) String() string {
 	builder.WriteString("updated_at=")
 	builder.WriteString(u.UpdatedAt.Format(time.ANSIC))
 	builder.WriteString(", ")
+	builder.WriteString("user_profile=")
+	builder.WriteString(fmt.Sprintf("%v", u.UserProfile))
+	builder.WriteString(", ")
 	builder.WriteString("status=")
 	builder.WriteString(fmt.Sprintf("%v", u.Status))
 	builder.WriteString(", ")
-	builder.WriteString("roles=")
-	builder.WriteString(fmt.Sprintf("%v", u.Roles))
+	builder.WriteString("scope=")
+	builder.WriteString(fmt.Sprintf("%v", u.Scope))
 	builder.WriteByte(')')
 	return builder.String()
 }

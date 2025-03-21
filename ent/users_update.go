@@ -14,6 +14,7 @@ import (
 	"entgo.io/ent/schema/field"
 	"github.com/besanh/mini-crm/ent/predicate"
 	"github.com/besanh/mini-crm/ent/users"
+	"github.com/besanh/mini-crm/models"
 )
 
 // UsersUpdate is the builder for updating Users entities.
@@ -57,6 +58,20 @@ func (uu *UsersUpdate) SetNillableUpdatedAt(t *time.Time) *UsersUpdate {
 	return uu
 }
 
+// SetUserProfile sets the "user_profile" field.
+func (uu *UsersUpdate) SetUserProfile(mp models.UserProfile) *UsersUpdate {
+	uu.mutation.SetUserProfile(mp)
+	return uu
+}
+
+// SetNillableUserProfile sets the "user_profile" field if the given value is not nil.
+func (uu *UsersUpdate) SetNillableUserProfile(mp *models.UserProfile) *UsersUpdate {
+	if mp != nil {
+		uu.SetUserProfile(*mp)
+	}
+	return uu
+}
+
 // SetStatus sets the "status" field.
 func (uu *UsersUpdate) SetStatus(u users.Status) *UsersUpdate {
 	uu.mutation.SetStatus(u)
@@ -71,15 +86,21 @@ func (uu *UsersUpdate) SetNillableStatus(u *users.Status) *UsersUpdate {
 	return uu
 }
 
-// SetRoles sets the "roles" field.
-func (uu *UsersUpdate) SetRoles(s []string) *UsersUpdate {
-	uu.mutation.SetRoles(s)
+// SetScope sets the "scope" field.
+func (uu *UsersUpdate) SetScope(s []string) *UsersUpdate {
+	uu.mutation.SetScope(s)
 	return uu
 }
 
-// AppendRoles appends s to the "roles" field.
-func (uu *UsersUpdate) AppendRoles(s []string) *UsersUpdate {
-	uu.mutation.AppendRoles(s)
+// AppendScope appends s to the "scope" field.
+func (uu *UsersUpdate) AppendScope(s []string) *UsersUpdate {
+	uu.mutation.AppendScope(s)
+	return uu
+}
+
+// ClearScope clears the value of the "scope" field.
+func (uu *UsersUpdate) ClearScope() *UsersUpdate {
+	uu.mutation.ClearScope()
 	return uu
 }
 
@@ -143,16 +164,22 @@ func (uu *UsersUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	if value, ok := uu.mutation.UpdatedAt(); ok {
 		_spec.SetField(users.FieldUpdatedAt, field.TypeTime, value)
 	}
+	if value, ok := uu.mutation.UserProfile(); ok {
+		_spec.SetField(users.FieldUserProfile, field.TypeJSON, value)
+	}
 	if value, ok := uu.mutation.Status(); ok {
 		_spec.SetField(users.FieldStatus, field.TypeEnum, value)
 	}
-	if value, ok := uu.mutation.Roles(); ok {
-		_spec.SetField(users.FieldRoles, field.TypeJSON, value)
+	if value, ok := uu.mutation.Scope(); ok {
+		_spec.SetField(users.FieldScope, field.TypeJSON, value)
 	}
-	if value, ok := uu.mutation.AppendedRoles(); ok {
+	if value, ok := uu.mutation.AppendedScope(); ok {
 		_spec.AddModifier(func(u *sql.UpdateBuilder) {
-			sqljson.Append(u, users.FieldRoles, value)
+			sqljson.Append(u, users.FieldScope, value)
 		})
+	}
+	if uu.mutation.ScopeCleared() {
+		_spec.ClearField(users.FieldScope, field.TypeJSON)
 	}
 	if n, err = sqlgraph.UpdateNodes(ctx, uu.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
@@ -202,6 +229,20 @@ func (uuo *UsersUpdateOne) SetNillableUpdatedAt(t *time.Time) *UsersUpdateOne {
 	return uuo
 }
 
+// SetUserProfile sets the "user_profile" field.
+func (uuo *UsersUpdateOne) SetUserProfile(mp models.UserProfile) *UsersUpdateOne {
+	uuo.mutation.SetUserProfile(mp)
+	return uuo
+}
+
+// SetNillableUserProfile sets the "user_profile" field if the given value is not nil.
+func (uuo *UsersUpdateOne) SetNillableUserProfile(mp *models.UserProfile) *UsersUpdateOne {
+	if mp != nil {
+		uuo.SetUserProfile(*mp)
+	}
+	return uuo
+}
+
 // SetStatus sets the "status" field.
 func (uuo *UsersUpdateOne) SetStatus(u users.Status) *UsersUpdateOne {
 	uuo.mutation.SetStatus(u)
@@ -216,15 +257,21 @@ func (uuo *UsersUpdateOne) SetNillableStatus(u *users.Status) *UsersUpdateOne {
 	return uuo
 }
 
-// SetRoles sets the "roles" field.
-func (uuo *UsersUpdateOne) SetRoles(s []string) *UsersUpdateOne {
-	uuo.mutation.SetRoles(s)
+// SetScope sets the "scope" field.
+func (uuo *UsersUpdateOne) SetScope(s []string) *UsersUpdateOne {
+	uuo.mutation.SetScope(s)
 	return uuo
 }
 
-// AppendRoles appends s to the "roles" field.
-func (uuo *UsersUpdateOne) AppendRoles(s []string) *UsersUpdateOne {
-	uuo.mutation.AppendRoles(s)
+// AppendScope appends s to the "scope" field.
+func (uuo *UsersUpdateOne) AppendScope(s []string) *UsersUpdateOne {
+	uuo.mutation.AppendScope(s)
+	return uuo
+}
+
+// ClearScope clears the value of the "scope" field.
+func (uuo *UsersUpdateOne) ClearScope() *UsersUpdateOne {
+	uuo.mutation.ClearScope()
 	return uuo
 }
 
@@ -318,16 +365,22 @@ func (uuo *UsersUpdateOne) sqlSave(ctx context.Context) (_node *Users, err error
 	if value, ok := uuo.mutation.UpdatedAt(); ok {
 		_spec.SetField(users.FieldUpdatedAt, field.TypeTime, value)
 	}
+	if value, ok := uuo.mutation.UserProfile(); ok {
+		_spec.SetField(users.FieldUserProfile, field.TypeJSON, value)
+	}
 	if value, ok := uuo.mutation.Status(); ok {
 		_spec.SetField(users.FieldStatus, field.TypeEnum, value)
 	}
-	if value, ok := uuo.mutation.Roles(); ok {
-		_spec.SetField(users.FieldRoles, field.TypeJSON, value)
+	if value, ok := uuo.mutation.Scope(); ok {
+		_spec.SetField(users.FieldScope, field.TypeJSON, value)
 	}
-	if value, ok := uuo.mutation.AppendedRoles(); ok {
+	if value, ok := uuo.mutation.AppendedScope(); ok {
 		_spec.AddModifier(func(u *sql.UpdateBuilder) {
-			sqljson.Append(u, users.FieldRoles, value)
+			sqljson.Append(u, users.FieldScope, value)
 		})
+	}
+	if uuo.mutation.ScopeCleared() {
+		_spec.ClearField(users.FieldScope, field.TypeJSON)
 	}
 	_node = &Users{config: uuo.config}
 	_spec.Assign = _node.assignValues

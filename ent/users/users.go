@@ -18,10 +18,12 @@ const (
 	FieldCreatedAt = "created_at"
 	// FieldUpdatedAt holds the string denoting the updated_at field in the database.
 	FieldUpdatedAt = "updated_at"
+	// FieldUserProfile holds the string denoting the user_profile field in the database.
+	FieldUserProfile = "user_profile"
 	// FieldStatus holds the string denoting the status field in the database.
 	FieldStatus = "status"
-	// FieldRoles holds the string denoting the roles field in the database.
-	FieldRoles = "roles"
+	// FieldScope holds the string denoting the scope field in the database.
+	FieldScope = "scope"
 	// Table holds the table name of the users in the database.
 	Table = "users"
 )
@@ -31,8 +33,9 @@ var Columns = []string{
 	FieldID,
 	FieldCreatedAt,
 	FieldUpdatedAt,
+	FieldUserProfile,
 	FieldStatus,
-	FieldRoles,
+	FieldScope,
 }
 
 // ValidColumn reports if the column name is valid (part of the table columns).

@@ -13,6 +13,7 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"github.com/besanh/mini-crm/ent/predicate"
 	"github.com/besanh/mini-crm/ent/users"
+	"github.com/besanh/mini-crm/models"
 	"github.com/google/uuid"
 )
 
@@ -36,9 +37,10 @@ type UsersMutation struct {
 	id            *uuid.UUID
 	created_at    *time.Time
 	updated_at    *time.Time
+	user_profile  *models.UserProfile
 	status        *users.Status
-	roles         *[]string
-	appendroles   []string
+	scope         *[]string
+	appendscope   []string
 	clearedFields map[string]struct{}
 	done          bool
 	oldValue      func(context.Context) (*Users, error)
@@ -221,6 +223,42 @@ func (m *UsersMutation) ResetUpdatedAt() {
 	m.updated_at = nil
 }
 
+// SetUserProfile sets the "user_profile" field.
+func (m *UsersMutation) SetUserProfile(mp models.UserProfile) {
+	m.user_profile = &mp
+}
+
+// UserProfile returns the value of the "user_profile" field in the mutation.
+func (m *UsersMutation) UserProfile() (r models.UserProfile, exists bool) {
+	v := m.user_profile
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldUserProfile returns the old "user_profile" field's value of the Users entity.
+// If the Users object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *UsersMutation) OldUserProfile(ctx context.Context) (v models.UserProfile, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldUserProfile is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldUserProfile requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldUserProfile: %w", err)
+	}
+	return oldValue.UserProfile, nil
+}
+
+// ResetUserProfile resets all changes to the "user_profile" field.
+func (m *UsersMutation) ResetUserProfile() {
+	m.user_profile = nil
+}
+
 // SetStatus sets the "status" field.
 func (m *UsersMutation) SetStatus(u users.Status) {
 	m.status = &u
@@ -257,55 +295,69 @@ func (m *UsersMutation) ResetStatus() {
 	m.status = nil
 }
 
-// SetRoles sets the "roles" field.
-func (m *UsersMutation) SetRoles(s []string) {
-	m.roles = &s
-	m.appendroles = nil
+// SetScope sets the "scope" field.
+func (m *UsersMutation) SetScope(s []string) {
+	m.scope = &s
+	m.appendscope = nil
 }
 
-// Roles returns the value of the "roles" field in the mutation.
-func (m *UsersMutation) Roles() (r []string, exists bool) {
-	v := m.roles
+// Scope returns the value of the "scope" field in the mutation.
+func (m *UsersMutation) Scope() (r []string, exists bool) {
+	v := m.scope
 	if v == nil {
 		return
 	}
 	return *v, true
 }
 
-// OldRoles returns the old "roles" field's value of the Users entity.
+// OldScope returns the old "scope" field's value of the Users entity.
 // If the Users object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *UsersMutation) OldRoles(ctx context.Context) (v []string, err error) {
+func (m *UsersMutation) OldScope(ctx context.Context) (v []string, err error) {
 	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldRoles is only allowed on UpdateOne operations")
+		return v, errors.New("OldScope is only allowed on UpdateOne operations")
 	}
 	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldRoles requires an ID field in the mutation")
+		return v, errors.New("OldScope requires an ID field in the mutation")
 	}
 	oldValue, err := m.oldValue(ctx)
 	if err != nil {
-		return v, fmt.Errorf("querying old value for OldRoles: %w", err)
+		return v, fmt.Errorf("querying old value for OldScope: %w", err)
 	}
-	return oldValue.Roles, nil
+	return oldValue.Scope, nil
 }
 
-// AppendRoles adds s to the "roles" field.
-func (m *UsersMutation) AppendRoles(s []string) {
-	m.appendroles = append(m.appendroles, s...)
+// AppendScope adds s to the "scope" field.
+func (m *UsersMutation) AppendScope(s []string) {
+	m.appendscope = append(m.appendscope, s...)
 }
 
-// AppendedRoles returns the list of values that were appended to the "roles" field in this mutation.
-func (m *UsersMutation) AppendedRoles() ([]string, bool) {
-	if len(m.appendroles) == 0 {
+// AppendedScope returns the list of values that were appended to the "scope" field in this mutation.
+func (m *UsersMutation) AppendedScope() ([]string, bool) {
+	if len(m.appendscope) == 0 {
 		return nil, false
 	}
-	return m.appendroles, true
+	return m.appendscope, true
 }
 
-// ResetRoles resets all changes to the "roles" field.
-func (m *UsersMutation) ResetRoles() {
-	m.roles = nil
-	m.appendroles = nil
+// ClearScope clears the value of the "scope" field.
+func (m *UsersMutation) ClearScope() {
+	m.scope = nil
+	m.appendscope = nil
+	m.clearedFields[users.FieldScope] = struct{}{}
+}
+
+// ScopeCleared returns if the "scope" field was cleared in this mutation.
+func (m *UsersMutation) ScopeCleared() bool {
+	_, ok := m.clearedFields[users.FieldScope]
+	return ok
+}
+
+// ResetScope resets all changes to the "scope" field.
+func (m *UsersMutation) ResetScope() {
+	m.scope = nil
+	m.appendscope = nil
+	delete(m.clearedFields, users.FieldScope)
 }
 
 // Where appends a list predicates to the UsersMutation builder.
@@ -342,18 +394,21 @@ func (m *UsersMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *UsersMutation) Fields() []string {
-	fields := make([]string, 0, 4)
+	fields := make([]string, 0, 5)
 	if m.created_at != nil {
 		fields = append(fields, users.FieldCreatedAt)
 	}
 	if m.updated_at != nil {
 		fields = append(fields, users.FieldUpdatedAt)
 	}
+	if m.user_profile != nil {
+		fields = append(fields, users.FieldUserProfile)
+	}
 	if m.status != nil {
 		fields = append(fields, users.FieldStatus)
 	}
-	if m.roles != nil {
-		fields = append(fields, users.FieldRoles)
+	if m.scope != nil {
+		fields = append(fields, users.FieldScope)
 	}
 	return fields
 }
@@ -367,10 +422,12 @@ func (m *UsersMutation) Field(name string) (ent.Value, bool) {
 		return m.CreatedAt()
 	case users.FieldUpdatedAt:
 		return m.UpdatedAt()
+	case users.FieldUserProfile:
+		return m.UserProfile()
 	case users.FieldStatus:
 		return m.Status()
-	case users.FieldRoles:
-		return m.Roles()
+	case users.FieldScope:
+		return m.Scope()
 	}
 	return nil, false
 }
@@ -384,10 +441,12 @@ func (m *UsersMutation) OldField(ctx context.Context, name string) (ent.Value, e
 		return m.OldCreatedAt(ctx)
 	case users.FieldUpdatedAt:
 		return m.OldUpdatedAt(ctx)
+	case users.FieldUserProfile:
+		return m.OldUserProfile(ctx)
 	case users.FieldStatus:
 		return m.OldStatus(ctx)
-	case users.FieldRoles:
-		return m.OldRoles(ctx)
+	case users.FieldScope:
+		return m.OldScope(ctx)
 	}
 	return nil, fmt.Errorf("unknown Users field %s", name)
 }
@@ -411,6 +470,13 @@ func (m *UsersMutation) SetField(name string, value ent.Value) error {
 		}
 		m.SetUpdatedAt(v)
 		return nil
+	case users.FieldUserProfile:
+		v, ok := value.(models.UserProfile)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetUserProfile(v)
+		return nil
 	case users.FieldStatus:
 		v, ok := value.(users.Status)
 		if !ok {
@@ -418,12 +484,12 @@ func (m *UsersMutation) SetField(name string, value ent.Value) error {
 		}
 		m.SetStatus(v)
 		return nil
-	case users.FieldRoles:
+	case users.FieldScope:
 		v, ok := value.([]string)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
-		m.SetRoles(v)
+		m.SetScope(v)
 		return nil
 	}
 	return fmt.Errorf("unknown Users field %s", name)
@@ -454,7 +520,11 @@ func (m *UsersMutation) AddField(name string, value ent.Value) error {
 // ClearedFields returns all nullable fields that were cleared during this
 // mutation.
 func (m *UsersMutation) ClearedFields() []string {
-	return nil
+	var fields []string
+	if m.FieldCleared(users.FieldScope) {
+		fields = append(fields, users.FieldScope)
+	}
+	return fields
 }
 
 // FieldCleared returns a boolean indicating if a field with the given name was
@@ -467,6 +537,11 @@ func (m *UsersMutation) FieldCleared(name string) bool {
 // ClearField clears the value of the field with the given name. It returns an
 // error if the field is not defined in the schema.
 func (m *UsersMutation) ClearField(name string) error {
+	switch name {
+	case users.FieldScope:
+		m.ClearScope()
+		return nil
+	}
 	return fmt.Errorf("unknown Users nullable field %s", name)
 }
 
@@ -480,11 +555,14 @@ func (m *UsersMutation) ResetField(name string) error {
 	case users.FieldUpdatedAt:
 		m.ResetUpdatedAt()
 		return nil
+	case users.FieldUserProfile:
+		m.ResetUserProfile()
+		return nil
 	case users.FieldStatus:
 		m.ResetStatus()
 		return nil
-	case users.FieldRoles:
-		m.ResetRoles()
+	case users.FieldScope:
+		m.ResetScope()
 		return nil
 	}
 	return fmt.Errorf("unknown Users field %s", name)

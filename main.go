@@ -25,10 +25,10 @@ import (
 	"github.com/cardinalby/hureg"
 	"github.com/danielgtaylor/huma/v2"
 	"github.com/danielgtaylor/huma/v2/adapters/humagin"
+	"github.com/fluent/fluent-logger-golang/fluent"
 	"github.com/gin-gonic/gin"
 	"golang.org/x/oauth2"
 
-	"github.com/fluent/fluent-logger-golang/fluent"
 	"github.com/joho/godotenv"
 )
 
@@ -62,12 +62,12 @@ func init() {
 	}
 
 	// Initialize NATS JetStream
-	if enableNatsJetstream := env.GetBoolENV("ENABLE_NATS_JETSTREAM", false); enableNatsJetstream {
+	if enableNatsJetstream := env.GetBoolENV("ENABLE_NATS", false); enableNatsJetstream {
 		initNatsJetstream()
 	}
 
 	// Initialize PostgreSQL
-	if enablePostgreSql := env.GetBoolENV("ENABLE_POSTGRESQL", false); enablePostgreSql {
+	if enablePostgreSql := env.GetBoolENV("ENABLE_PG", false); enablePostgreSql {
 		initPostgreSql()
 	}
 }

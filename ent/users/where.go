@@ -165,6 +165,16 @@ func StatusNotIn(vs ...Status) predicate.Users {
 	return predicate.Users(sql.FieldNotIn(FieldStatus, vs...))
 }
 
+// ScopeIsNil applies the IsNil predicate on the "scope" field.
+func ScopeIsNil() predicate.Users {
+	return predicate.Users(sql.FieldIsNull(FieldScope))
+}
+
+// ScopeNotNil applies the NotNil predicate on the "scope" field.
+func ScopeNotNil() predicate.Users {
+	return predicate.Users(sql.FieldNotNull(FieldScope))
+}
+
 // And groups predicates with the AND operator between them.
 func And(predicates ...predicate.Users) predicate.Users {
 	return predicate.Users(sql.AndPredicates(predicates...))

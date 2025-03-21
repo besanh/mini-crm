@@ -1,9 +1,11 @@
 package sqlclient
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"net/url"
+	"time"
 
 	"entgo.io/ent/dialect"
 	"entgo.io/ent/dialect/sql"
@@ -54,7 +56,16 @@ func NewSqlClient(config SqlConfig) ISqlClientConn {
 
 	if err := client.Connect(); err != nil {
 		log.Fatal("Connect error:", err)
-		return nil
+		panic(err)
+	}
+
+	// AutoMigrate
+	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+	defer cancel()
+
+	if err := client.GetDB().Schema.Create(ctx); err != nil {
+		log.Fatal("Schema create error:", err)
+		panic(err)
 	}
 
 	log.Info("Connected to database")
@@ -93,19 +104,21 @@ func (c *SqlClientConn) Connect() (err error) {
 			c.Timeout,
 		)
 
-		driver, err := sql.Open("pgx", dsn)
+		rawDB, err := sql.Open("pgx", dsn)
 		if err != nil {
 			return err
 		}
-		driver.DB().SetMaxIdleConns(c.MaxIdleConns)
-		driver.DB().SetMaxOpenConns(c.MaxOpenConns)
+		rawDB.DB().SetMaxIdleConns(c.MaxIdleConns)
+		rawDB.DB().SetMaxOpenConns(c.MaxOpenConns)
+
+		// Wrap rawDB với dialect Postgres:
+		driver := sql.OpenDB(dialect.Postgres, rawDB.DB())
+		client := ent.NewClient(ent.Driver(driver))
+		c.DB = client
 
 		if err := driver.DB().Ping(); err != nil {
 			log.Error(err)
 		}
-
-		client := ent.NewClient(ent.Driver(driver))
-		c.DB = client
 
 		return nil
 	default:
