@@ -20,7 +20,7 @@ import (
 	"github.com/besanh/mini-crm/pkgs/redis"
 	"github.com/besanh/mini-crm/pkgs/sqlclient"
 	"github.com/besanh/mini-crm/repositories"
-	"github.com/besanh/mini-crm/server"
+	server "github.com/besanh/mini-crm/servers"
 	"github.com/besanh/mini-crm/services"
 	"github.com/cardinalby/hureg"
 	"github.com/danielgtaylor/huma/v2"
@@ -40,7 +40,7 @@ var (
 // init is the entry point of the application
 func init() {
 	// Load env file
-	if err := godotenv.Load(".env"); err != nil {
+	if err := godotenv.Load("./.env"); err != nil {
 		panic(err)
 	}
 
@@ -75,7 +75,7 @@ func init() {
 // initLogger initializes the logger with the given log level and log file.
 // If a log server is provided, it will send the logs to the server.
 func initLogger() {
-	logFile := "tmp/console.log"
+	logFile := "./tmp/console.log"
 	logLevel := log.LEVEL_DEBUG
 	switch env.GetStringENV("LOG_LEVEL", "error") {
 	case "debug":
@@ -266,7 +266,7 @@ func initServer(server *gin.Engine) {
 					// Name of the contact person.
 					Name: "ANHLE- Mini CRM",
 					// URL of the API documentation.
-					URL: "15.235.185.218",
+					URL: "https://github.com/besanh/mini-crm",
 					// Email address of the contact person.
 					Email: "anhle3532@gmail.com",
 				},
