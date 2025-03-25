@@ -10,8 +10,10 @@ import (
 
 	"github.com/alexedwards/scs/v2"
 	log "github.com/besanh/logger/logging/slog"
+	v1 "github.com/besanh/mini-crm/apis/v1"
 	"github.com/besanh/mini-crm/common/cache"
 	"github.com/besanh/mini-crm/common/env"
+	"github.com/besanh/mini-crm/common/response"
 	"github.com/besanh/mini-crm/common/util"
 	"github.com/besanh/mini-crm/common/variable"
 	"github.com/besanh/mini-crm/pkgs/messagequeue"
@@ -242,6 +244,7 @@ func main() {
 
 	// Initialize server
 	initServer(router)
+	response.NewHumaError()
 
 	server.Start(router, env.GetStringENV("API_PORT", "8000"))
 }
@@ -303,7 +306,6 @@ func initServer(server *gin.Engine) {
 		// Default format of the API.
 	})
 
-	api := hureg.NewAPIGen(humaAPI)
 	server.GET("/anhle/openapi/docs", func(c *gin.Context) {
 		c.Data(http.StatusOK, "text/html; charset=utf-8", []byte(`
 		<!doctype html>
@@ -326,8 +328,9 @@ func initServer(server *gin.Engine) {
 
 	// Create a new Hureg API generator.
 
-	initServices(server, &api)
 	// Initialize the services with the server.
+	api := hureg.NewAPIGen(humaAPI)
+	initServices(server, &api)
 }
 
 // initServices initializes services with the server instance.
@@ -357,4 +360,6 @@ func initServices(server *gin.Engine, api *hureg.APIGen) {
 	// Create a new OAuth2 client from the OAuth2 configuration.
 	// oAuth2Client := oauth.NewOAuth2(*services.OAUTH2CONFIG)
 
+	// Handlers
+	v1.NewHealthCheck(api)
 }
