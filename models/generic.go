@@ -15,9 +15,9 @@ type (
 	}
 
 	GBase struct {
-		Id        uuid.UUID `json:"id" bun:"id,pk,type:uuid"`
-		CreatedAt time.Time `json:"created_at" bun:"created_at,type:timestamp,notnull"`
-		UpdatedAt time.Time `json:"updated_at" bun:"updated_at,type:timestamp,notnull"`
+		Id        uuid.UUID `json:"id"`
+		CreatedAt time.Time `json:"created_at"`
+		UpdatedAt time.Time `json:"updated_at"`
 	}
 )
 

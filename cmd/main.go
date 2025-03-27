@@ -167,12 +167,12 @@ func initRedis() {
 	// Initialize the Redis cache with the Redis client.
 	cache.RCache = cache.NewRedisCache(redis.Redis.GetClient())
 
-	// redisCfg := messagequeue.Rcfg{
-	// 	Address:  env.GetStringENV("REDIS_ADDRESS", "localhost"),
-	// 	Password: env.GetStringENV("REDIS_PASSWORD", ""),
-	// 	DB:       env.GetIntENV("REDIS_RMQ_DB", 1),
-	// }
-	// messagequeue.RMQ = messagequeue.NewRMQ(redisCfg)
+	redisCfg := messagequeue.Rcfg{
+		Address:  env.GetStringENV("REDIS_ADDRESS", "localhost"),
+		Password: env.GetStringENV("REDIS_PASSWORD", ""),
+		DB:       env.GetIntENV("REDIS_RMQ_DB", 1),
+	}
+	messagequeue.RMQ = messagequeue.NewRMQ(redisCfg)
 }
 
 // initNatsJetstream initializes the NATS JetStream client.
@@ -337,6 +337,7 @@ func initServer(server *gin.Engine) {
 // It creates new instances of the repositories, services, and handlers, and registers them with the server.
 func initServices(server *gin.Engine, api *hureg.APIGen) {
 	// Repositories
+	usersRepo := repositories.NewUsers(repositories.DBConn.GetDB())
 
 	// Services
 	// Create a new OAuth2 configuration from environment variables.
@@ -359,7 +360,9 @@ func initServices(server *gin.Engine, api *hureg.APIGen) {
 
 	// Create a new OAuth2 client from the OAuth2 configuration.
 	// oAuth2Client := oauth.NewOAuth2(*services.OAUTH2CONFIG)
+	userService := services.NewUsers(usersRepo)
 
 	// Handlers
 	v1.NewHealthCheck(api)
+	v1.NewUsers(api, userService)
 }

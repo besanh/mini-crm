@@ -12,17 +12,17 @@ import (
 
 type (
 	IUsers interface {
-		GetUserByID(ctx context.Context, client *ent.Client, id uuid.UUID) (*models.UserResponse, error)
+		GetUserByID(ctx context.Context, id uuid.UUID) (*models.UserResponse, error)
 	}
 	Users struct {
+		client *ent.Client
 	}
 )
 
-/*
- * Declare new repo with collection(table)
- */
-func NewUsers() IUsers {
-	return &Users{}
+func NewUsers(client *ent.Client) IUsers {
+	return &Users{
+		client: client,
+	}
 }
 
 func convertToUserResponse(u *ent.Users) *models.UserResponse {
@@ -48,8 +48,8 @@ func convertToUserResponse(u *ent.Users) *models.UserResponse {
 	}
 }
 
-func (r *Users) GetUserByID(ctx context.Context, client *ent.Client, id uuid.UUID) (*models.UserResponse, error) {
-	result, err := client.Users.Query().
+func (r *Users) GetUserByID(ctx context.Context, id uuid.UUID) (result *models.UserResponse, err error) {
+	res, err := r.client.Users.Query().
 		Where(
 			users.ID(id),
 		).
@@ -58,5 +58,7 @@ func (r *Users) GetUserByID(ctx context.Context, client *ent.Client, id uuid.UUI
 		log.Error(err)
 		return nil, err
 	}
-	return convertToUserResponse(result), nil
+
+	result = convertToUserResponse(res)
+	return
 }

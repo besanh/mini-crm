@@ -5,6 +5,3 @@ import (
 )
 
 var DBConn sqlclient.ISqlClientConn
-
-func InitRepositories() {
-}
